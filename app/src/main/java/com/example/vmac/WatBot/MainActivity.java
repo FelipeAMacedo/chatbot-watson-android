@@ -2,6 +2,7 @@ package com.example.vmac.WatBot;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Typeface;
 import android.net.ConnectivityManager;
@@ -10,14 +11,23 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ConfigurationHelper;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
+import android.widget.Spinner;
+import android.widget.Switch;
 import android.widget.Toast;
 
 import com.ibm.mobilefirstplatform.clientsdk.android.analytics.api.Analytics;
@@ -35,6 +45,7 @@ import com.ibm.watson.developer_cloud.conversation.v1.model.MessageResponse;
 import com.ibm.watson.developer_cloud.speech_to_text.v1.SpeechToText;
 import com.ibm.watson.developer_cloud.speech_to_text.v1.model.RecognizeOptions;
 import com.ibm.watson.developer_cloud.speech_to_text.v1.model.SpeakerLabel;
+import com.ibm.watson.developer_cloud.speech_to_text.v1.model.SpeechModel;
 import com.ibm.watson.developer_cloud.speech_to_text.v1.model.SpeechResults;
 import com.ibm.watson.developer_cloud.speech_to_text.v1.websocket.RecognizeCallback;
 import com.ibm.watson.developer_cloud.text_to_speech.v1.TextToSpeech;
@@ -83,7 +94,7 @@ public class MainActivity extends AppCompatActivity {
     private SpeakerLabelsDiarization.RecoTokens recoTokens;
     private MicrophoneHelper microphoneHelper;
 
-
+    private String languageChoosen = "pt-BR_BroadbandModel";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -181,9 +192,9 @@ public class MainActivity extends AppCompatActivity {
                             streamPlayer = new StreamPlayer();
                             if(audioMessage != null && !audioMessage.getMessage().isEmpty())
                                 //Change the Voice format and choose from the available choices
-                                streamPlayer.playStream(textToSpeech.synthesize(audioMessage.getMessage(), Voice.EN_LISA).execute());
+                                streamPlayer.playStream(textToSpeech.synthesize(audioMessage.getMessage(), Voice.PT_ISABELA).execute());
                             else
-                                streamPlayer.playStream(textToSpeech.synthesize("No Text Specified", Voice.EN_LISA).execute());
+                                streamPlayer.playStream(textToSpeech.synthesize("No Text Specified", Voice.PT_ISABELA).execute());
 
                         } catch (Exception e) {
                             e.printStackTrace();
@@ -215,6 +226,37 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main_activity_menu, menu);
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_main_english:
+                languageChoosen = "en-US_BroadbandModel";
+                Toast.makeText(MainActivity.this, "Language changed to english", Toast.LENGTH_LONG).show();
+                break;
+            case R.id.menu_main_espanol:
+                languageChoosen = "es-ES_BroadbandModel";
+                Toast.makeText(MainActivity.this, "O idioma mudou para o ESPAÑOL", Toast.LENGTH_LONG).show();
+                break;
+            case R.id.menu_main_portugues:
+                languageChoosen = "pt-BR_BroadbandModel";
+                Toast.makeText(MainActivity.this, "O idioma mudou para o português", Toast.LENGTH_LONG).show();
+                break;
+            case R.id.menu_main_config:
+                Intent intent = new Intent(MainActivity.this, ConfigurationActivity.class);
+                startActivity(intent);
+                break;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
 
     // Speech-to-Text Record Audio permission
     @Override
@@ -337,7 +379,6 @@ public class MainActivity extends AppCompatActivity {
         speechService = new SpeechToText();
         speechService.setUsernameAndPassword(STT_username, STT_password);
 
-
         if(listening != true) {
             capture = microphoneHelper.getInputStream(true);
             new Thread(new Runnable() {
@@ -393,7 +434,7 @@ public class MainActivity extends AppCompatActivity {
         return new RecognizeOptions.Builder()
                 .continuous(true)
                 .contentType(ContentType.OPUS.toString())
-                //.model("en-UK_NarrowbandModel")
+                .model(languageChoosen)
                 .interimResults(true)
                 .inactivityTimeout(2000)
                 //TODO: Uncomment this to enable Speaker Diarization

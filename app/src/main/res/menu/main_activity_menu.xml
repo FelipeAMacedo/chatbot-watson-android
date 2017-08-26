@@ -1,0 +1,18 @@
+<menu  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <group>
+        <item android:id="@+id/menu_main_english"
+            android:title="English" />
+
+        <item android:id="@+id/menu_main_espanol"
+            android:title="Español" />
+
+        <item android:id="@+id/menu_main_portugues"
+            android:title="Português" />
+    </group>
+    <group>
+        <item android:id="@+id/menu_main_config"
+            android:title="Configurações"/>
+    </group>
+</menu>
